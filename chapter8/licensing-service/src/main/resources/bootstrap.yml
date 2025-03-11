@@ -1,0 +1,78 @@
+spring:
+  application:
+    name: licensing-service
+  profiles:
+    active: dev
+  cloud:
+    config:
+      uri: http://configserver:8071
+      name: licensing-service
+  main:
+    allow-bean-definition-overriding: true
+
+logging:
+  level:
+    com.netflix: WARN
+    org.springframework.web: WARN
+    com.optimagrowth: DEBUG
+
+#management.endpoints.web.base-path=/
+management.endpoints.enabled-by-default: false
+management.endpoint.health:
+  enabled: true
+  show-details: always
+
+
+resilience4j.circuitbreaker:
+  instances:
+    licenseService:
+      registerHealthIndicator: true       # 상태 정보 엔드포인트에 대한 구성 정보 노출 여부
+      #     ringBufferSizeInClosedState: 5    => deprecated
+      sliding-window-size: 5              # 링 버퍼의 닫힌 상태 크기
+      #     ringBufferSizeInHalfOpenState: 3  => deprecated
+      permitted-number-of-calls-in-half-open-state: 3
+      waitDurationInOpenState: 10s        # 링 버퍼의 반열린 상태 크기
+      failureRateThreshold: 50            # 열린 상태의 대기 시간
+      recordExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+        - java.io.IOException
+        - java.util.concurrent.TimeoutException
+        - org.springframework.web.client.ResourceAccessException
+
+    organizationService:
+      registerHealthIndicator: true
+      #      ringBufferSizeInClosedState: 6
+      sliding-window-size: 6
+      #      ringBufferSizeInHalfOpenState: 4
+      permitted-number-of-calls-in-half-open-state: 4
+      waitDurationInOpenState: 20s
+      failureRateThreshold: 60           # 실패율 임계치 ( % )
+
+resilience4j.ratelimiter:
+  instances:
+    licenseService:
+      limitForPeriod: 5
+      limitRefreshPeriod: 5000
+      timeoutDuration: 1000ms
+
+resilience4j.retry:
+  instances:
+    retryLicenseService:
+      #      maxRetryAttempts: 5 => deprecated
+      max-attempts: 5
+      waitDuration: 10000
+      retry-exceptions:
+        - java.util.concurrent.TimeoutException
+
+resilience4j.bulkhead:
+  instances:
+    bulkheadLicenseService:
+      maxWaitDuration: 2ms    # 스레드를 차단할 최대 시간
+      maxConcurrentCalls: 20  # 최대 동시 호출 수
+
+resilience4j.thread-pool-bulkhead:
+  instances:
+    bulkheadLicenseService:
+      maxThreadPoolSize: 1   # 스레드 풀에서 최대 스레드 수
+      coreThreadPoolSize: 1  # 코어 스레드 풀 크기
+      queueCapacity: 1       # 큐 용량

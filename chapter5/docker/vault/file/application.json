@@ -1,0 +1,17 @@
+{
+  "management": {
+    "endpoints": {
+      "enabled-by-default": "true",
+      "web": {
+        "exposure": {
+          "include": "*"
+        }
+      }
+    }
+  },
+  "spring": {
+    "main": {
+      "allow-bean-definition-overriding": "true"
+    }
+  }
+}

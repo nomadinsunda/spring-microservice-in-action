@@ -1,0 +1,26 @@
+{
+  "example": {
+    "property": "I AM THE DEFAULT"
+  },
+  "spring": {
+    "jpa": {
+      "hibernate": {
+        "ddl-auto": "none",
+        "naming-strategy": "org.hibernate.cfg.ImprovedNamingStrategy",
+        "properties": {
+          "hibernate.dialect": "org.hibernate.dialect.PostgreSQLDialect"
+        }
+      },
+      "database": "POSTGRESQL",
+      "show-sql": "true"
+    },
+    "datasource": {
+      "platform": "postgres",
+      "testWhileIdle": "true",
+      "validationQuery": "SELECT 1"
+    },
+    "database": {
+      "driverClassName": "org.postgresql.Driver"
+    }
+  }
+}

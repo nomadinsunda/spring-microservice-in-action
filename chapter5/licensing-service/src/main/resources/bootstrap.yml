@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: licensing-service
+  profiles:
+    active: dev
+
+  config:
+    import: "configserver:http://configserver:8071/"

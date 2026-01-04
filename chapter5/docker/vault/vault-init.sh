@@ -1,40 +1,57 @@
-#!/bin/bash
+#!/bin/sh
+# 1. 서버 시작
+vault server -config=/vault/config/config.hcl > /vault/data/server.log 2>&1 &
 
-echo "==> 스크립트 실행 중"
-echo "==> 서버 dev 모드로 실행"
-# vault server 시작 // -config=/vault/config/config.hcl
-vault server -dev -dev-root-token-id="myroot" -dev-listen-address="0.0.0.0:8200"&
+echo "==> Waiting for Vault..."
+until vault status -address=http://127.0.0.1:8200 2>&1 | grep -q "Initialized"; do
+    sleep 1
+done
 
-# 대기 시간 추가 (예: 5초)
-echo "==> 서버가 제대로 동작할 때까지 대기 5초"
-sleep 5
+export VAULT_ADDR='http://127.0.0.1:8200'
 
-# Vault 서버에 접근할 주소 설정
-export VAULT_ADDR='http://0.0.0.0:8200'
+# 2. 초기화 (데이터 없으면 수행)
+if [ ! -f /vault/data/keys.txt ]; then
+    vault operator init -key-shares=1 -key-threshold=1 > /vault/data/keys.txt
+    TEMP_TOKEN=$(grep "Initial Root Token:" /vault/data/keys.txt | cut -d' ' -f4 | tr -d '\r')
+    K1=$(grep "Unseal Key 1:" /vault/data/keys.txt | cut -d' ' -f4 | tr -d '\r')
+    
+    vault operator unseal "$K1"
+    
+    # Root 토큰을 'myroot'로 고정
+    VAULT_TOKEN="$TEMP_TOKEN" vault token create -id="myroot" -policy="root"
+    export VAULT_TOKEN="myroot"
 
-# root 토큰 설정
-export VAULT_TOKEN='myroot'
+    # [중요] secret 엔진을 KV Version 2로 활성화 (403 에러 방지 핵심)
+    # 이미 존재하면 무시, 없으면 kv-v2로 생성
+    vault secrets enable -path=secret kv-v2 || true
+fi
 
-# Vault CLI 명령어를 사용하여 데이터를 메모리에 저장
-#echo "==> 저장 경로 생성"
-#VAULT_TOKEN=myroot vault secrets enable -version=2 -path=licensing-service kv
+# 상시 Unseal
+K1=$(grep "Unseal Key 1:" /vault/data/keys.txt | cut -d' ' -f4 | tr -d '\r')
+vault operator unseal "$K1"
 
-# 경로를 새로 생성하는게 잘 안 되서 기존에 있던 secret 경로로 데이터를 생성했습니다
+export VAULT_TOKEN="myroot"
+sleep 1
+
+# 3. KV V2 방식으로 데이터 주입 (kv put 사용)
+echo "==> Injecting secrets into KV V2..."
+
 echo "==> application 데이터 저장"
-VAULT_TOKEN=myroot vault kv put secret/application @/vault/data/application.json
+vault kv put secret/application @/vault/data/application.json || true
 
 echo "==> application/dev 데이터 저장"
-VAULT_TOKEN=myroot vault kv put secret/application/dev @/vault/data/application_dev.json
+vault kv put secret/application/dev @/vault/data/application_dev.json || true
 
 echo "==> default 데이터 저장"
-VAULT_TOKEN=myroot vault kv put secret/licensing-service @/vault/data/default.json
+vault kv put secret/licensing-service @/vault/data/default.json || true
 
 echo "==> dev 데이터 저장"
-VAULT_TOKEN=myroot vault kv put secret/licensing-service/dev @/vault/data/dev.json
+vault kv put secret/licensing-service/dev @/vault/data/dev.json || true
 
 echo "==> prod 데이터 저장"
-VAULT_TOKEN=myroot vault kv put secret/licensing-service/prod @/vault/data/prod.json
+vault kv put secret/licensing-service/prod @/vault/data/prod.json || true
 
-# 스크립트 종료까지 서버를 계속 유지
-echo "==> Vault 서버를 유지합니다. Ctrl+C로 스크립트를 종료하세요."
+
+
+echo "==> VAULT READY (Token: myroot, Engine: KV-V2)"
 wait

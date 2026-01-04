@@ -1,4 +1,5 @@
 version: '2.1'
+
 services:
   vault:
     image: hashicorp/vault:latest
@@ -6,8 +7,8 @@ services:
     ports:
       - "8200:8200"
     environment:
-      VAULT_DEV_ROOT_TOKEN_ID: "myroot"
-#      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8201"
+      - VAULT_ADDR=http://127.0.0.1:8200
+      - VAULT_TOKEN=myroot
     networks:
       backend:
         aliases:
@@ -19,6 +20,11 @@ services:
     cap_add:
       - IPC_LOCK
     command: ["sh", "/vault/vault-init.sh"]
+    healthcheck:
+      test: ["CMD", "vault", "status", "-address=http://127.0.0.1:8200"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   database:
     image: postgres:latest
@@ -27,10 +33,10 @@ services:
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
-      POSTGRES_DB:       "ostock_dev"
+      POSTGRES_DB: "ostock_dev"
     volumes:
-        - ./init.sql:/docker-entrypoint-initdb.d/1-init.sql
-        - ./data.sql:/docker-entrypoint-initdb.d/2-data.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/1-init.sql
+      - ./data.sql:/docker-entrypoint-initdb.d/2-data.sql
     networks:
       backend:
         aliases:
@@ -42,31 +48,38 @@ services:
       retries: 5
 
   configserver:
-    image: ostock/configserver:0.0.1-SNAPSHOT
+    image: intheeast0305/configserver:1.0.0
     ports:
-       - "8071:8071"
+      - "8071:8071"
     environment:
       ENCRYPT_KEY: "fje83Ki8403Iod87dne7Yjsl3THueh48jfuO9j4U2hf64Lo"
-#      VAULT_HOST: "host.docker.internal"
       VAULT_HOST: "vault"
+    depends_on:
+      vault:
+        condition: service_healthy
     networks:
       backend:
         aliases:
           - "configserver"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8071/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
 
   licensingservice:
-    image: ostock/licensing-service:0.0.2-SNAPSHOT
+    image: intheeast0305/licensing-service:1.0.0
     environment:
       PROFILE: "dev"
       CONFIGSERVER_URI: "http://configserver:8071"
-      CONFIGSERVER_PORT:   "8071"
+      CONFIGSERVER_PORT: "8071"
       DATABASESERVER_PORT: "5432"
-      ENCRYPT_KEY: "fje83Ki8403Iod87dne7Yjsl3THueh48jfuO9j4U2hf64Lo" # "IMSYMMETRIC"
+      ENCRYPT_KEY: "fje83Ki8403Iod87dne7Yjsl3THueh48jfuO9j4U2hf64Lo"
     depends_on:
       database:
         condition: service_healthy
       configserver:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "8080:8080"
     networks:

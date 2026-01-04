@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.optimagrowth.license.model.ExampleProperties;
@@ -29,14 +28,14 @@ public class LicenseController {
 	@Autowired
 	private LicenseService licenseService;
 	
-	@GetMapping("/property")
-    public String getExampleProperty() {
-        return exampleProperties.getProperty();
-    }
-	
 	public LicenseController(ExampleProperties exampleProperties) {
 		this.exampleProperties = exampleProperties;
 	}
+	
+	@GetMapping("/property")
+    public String getExampleProperty() {
+        return exampleProperties.getProperty();
+    }	
 
 	@GetMapping(value="/{organizationId}/{licenseId}")
 	public ResponseEntity<License> getLicense( 

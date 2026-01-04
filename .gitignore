@@ -53,3 +53,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+# Vault secrets
+chapter5/docker/vault/file/keys.txt
+chapter5/docker/vault/file/keys.json
+chapter5/docker/vault/file/*.log

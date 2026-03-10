@@ -1,0 +1,13 @@
+spring:
+    application:
+     name: licensing-service  # service-id
+    profiles:
+      active: dev
+    config:
+      import: "configserver:http://configserver:8071/"
+
+    main:
+      allow-bean-definition-overriding: true
+
+#example:
+#..

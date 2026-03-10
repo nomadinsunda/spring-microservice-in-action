@@ -23,6 +23,7 @@ spring:
         uri: lb://organization-service
         predicates:
         - Path=/organization/**
+#        - method=GET
         filters:
         - RewritePath=/organization/(?<path>.*), /$\{path}
 

@@ -89,3 +89,4 @@ Administrative Namespace:
 2026-01-04T07:11:44.376Z [INFO]  core: usage gauge collection is disabled
 2026-01-04T07:11:44.376Z [INFO]  core: post-unseal setup complete
 2026-01-04T07:11:44.516Z [INFO]  core: successful mount: namespace="" path=secret/ type=kv version="v0.25.0+builtin"
+==> Vault shutdown triggered

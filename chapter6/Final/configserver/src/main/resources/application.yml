@@ -12,7 +12,7 @@ spring:
           search-locations: classpath:/config
         git:
           uri: https://github.com/ihuaylupo/config.git
-          searchPaths: licensingservice #존재하지 않음
+          searchPaths: licensing-service #존재하지 않음
           default-label: master # 브랜치명
 
 server:

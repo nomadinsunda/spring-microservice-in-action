@@ -7,13 +7,14 @@ spring:
 server:
   port: 8070
 
+# 혼자 존재한다는 것은 standalone을 의미
 eureka:
   instance:
     hostname: eurekaserver
-  client:
-    registerWithEureka: false
-    fetchRegistry: false
-    serviceUrl:
+  client: # 다른 유레가 서버을 의미
+    registerWithEureka: false  # 혼자 존재하기 때문에 다른 유레카 서버에게 자기 자신 정보를 등록할 필요가 없음
+    fetchRegistry: false       # 혼자 존재하기 때문에 다른 유레가 서버의 서비스 레지스트리 정보가 필요가 없음
+    serviceUrl:                # 혼자 존재하기 때문에 디폴트 존은 곧 자기 자신 주소임.
       defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
   server:
     waitTimeInMsWhenSyncEmpty: 5

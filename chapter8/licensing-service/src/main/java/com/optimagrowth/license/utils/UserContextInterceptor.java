@@ -17,10 +17,19 @@ public class UserContextInterceptor implements ClientHttpRequestInterceptor {
             HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
             throws IOException {
 
+    	// 전
         HttpHeaders headers = request.getHeaders();
         headers.add(UserContext.CORRELATION_ID, UserContextHolder.getContext().getCorrelationId());
         headers.add(UserContext.AUTH_TOKEN, UserContextHolder.getContext().getAuthToken());
 
-        return execution.execute(request, body);
+        // 다음 코드로 RestTemplate의 getForObject, putForObject 또는 exchange 메서드를 호출함!!!
+        ClientHttpResponse res = execution.execute(request, body);
+        
+        // 후
+        // ...
+        // ...
+        
+        
+        return res;
     }
 }

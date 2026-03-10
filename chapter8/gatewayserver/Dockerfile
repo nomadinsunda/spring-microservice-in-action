@@ -1,9 +1,9 @@
 #stage 1
 #Start with a base image containing Java runtime
-FROM openjdk:17 as build
+FROM eclipse-temurin:17-jdk as build
 
 # Add Maintainer Info
-LABEL maintainer="jhcode33 <jhcode33@gmail.com>"
+LABEL maintainer="swseo <intheeast0305@gmail.com>"
 
 # The application's jar file
 ARG JAR_FILE=target/gatewayserver-0.0.1-SNAPSHOT.jar
@@ -16,7 +16,7 @@ RUN mkdir -p target/dependency && (cd target/dependency; jar -xf /app.jar)
 
 #stage 2
 #Same Java runtime
-FROM openjdk:17
+FROM eclipse-temurin:17-jdk
 
 #Add volume pointing to /tmp
 VOLUME /tmp

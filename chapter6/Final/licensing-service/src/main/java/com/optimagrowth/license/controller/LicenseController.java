@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -41,7 +42,9 @@ public class LicenseController {
 		return ResponseEntity.ok(license);
 	}
 
-	@RequestMapping(value="/{licenseId}/{clientType}",method = RequestMethod.GET)
+	// clientType = { feign, rest, discovery }
+	// /v1/organization/d898a142-de44-466c-8c88-9ceb2c2429d3/license/f2a9c9d4-d2c0-44fa-97fe-724d77173c62/{clientType}
+	@GetMapping(value="/{licenseId}/{clientType}")
 	public License getLicensesWithClient( @PathVariable("organizationId") String organizationId,
 			@PathVariable("licenseId") String licenseId,
 			@PathVariable("clientType") String clientType) {

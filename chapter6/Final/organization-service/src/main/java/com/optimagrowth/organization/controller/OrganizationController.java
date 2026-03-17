@@ -14,15 +14,21 @@ import org.springframework.web.bind.annotation.RestController;
 import com.optimagrowth.organization.model.Organization;
 import com.optimagrowth.organization.service.OrganizationService;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping(value="v1/organization")
 public class OrganizationController {
     @Autowired
     private OrganizationService service;
 
+    private static final org.slf4j.Logger log =
+            org.slf4j.LoggerFactory.getLogger(OrganizationController.class);
 
     @RequestMapping(value="/{organizationId}",method = RequestMethod.GET)
     public ResponseEntity<Organization> getOrganization( @PathVariable("organizationId") String organizationId) {
+    	log.info("getOrganization method called : " + organizationId);
         return ResponseEntity.ok(service.findById(organizationId));
     }
 

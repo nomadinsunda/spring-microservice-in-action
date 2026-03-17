@@ -1,12 +1,12 @@
 #stage 1
 #Start with a base image containing Java runtime
-FROM openjdk:17 as build
+FROM eclipse-temurin:17-jdk as build
 
 # Add Maintainer Info
 LABEL maintainer="Illary Huaylupo <illaryhs@gmail.com>"
 
 # The application's jar file
-ARG JAR_FILE=target/configerserver-0.0.1.SNAPSHOP.jar
+ARG JAR_FILE=target/configserver-0.0.1-SNAPSHOT.jar
 
 # Add the application's jar to the container
 COPY ${JAR_FILE} app.jar
@@ -16,7 +16,7 @@ RUN mkdir -p target/dependency && (cd target/dependency; jar -xf /app.jar)
 
 #stage 2
 #Same Java runtime
-FROM openjdk:17
+FROM eclipse-temurin:17-jdk
 
 #Add volume pointing to /tmp
 VOLUME /tmp

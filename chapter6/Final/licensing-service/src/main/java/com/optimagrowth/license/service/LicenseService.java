@@ -37,6 +37,7 @@ public class LicenseService {
 	OrganizationDiscoveryClient organizationDiscoveryClient;
 
 	public License getLicense(String licenseId, String organizationId, String clientType){
+		// select * from licenses l where l.license_id =  ? and l.organization_id = ? 
 		License license = licenseRepository.findByOrganizationIdAndLicenseId(organizationId, licenseId);
 		if (null == license) {
 			throw new IllegalArgumentException(String.format(messages.getMessage("license.search.error.message", null, null),licenseId, organizationId));	
